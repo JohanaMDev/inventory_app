@@ -28,6 +28,12 @@ El sistema implementa una **jerarquía de servicios** estratégica para delegar 
 * **Manejo Global de Excepciones:** Respuestas estandarizadas en JSON que informan el origen exacto del error sin comprometer la integridad del sistema.
 * **Normalización de Datos:** Diseño relacional optimizado para evitar redundancias en información laboral y fiscal.
 
+## 📊 Modelo de Datos (ERD)
+La arquitectura de la base de datos refleja un diseño orientado a la escalabilidad y el desacoplamiento de lógicas de negocio.
+
+![Database Schema](./assets/postgres%20-%20inventory_db%20-%20public.png)
+
+
 ## 🛠 Instalación y Ejecución
 1.  **Clonar el repositorio:** `git clone https://github.com/JohanaMDev/inventory_app.git`
 2.  **Configurar Base de Datos:** Establecer credenciales en `src/main/resources/application.properties`.
