@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# IntelliJ IDEA local run configurations
+.idea/runConfigurations/
+*.run.xml
