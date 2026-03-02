@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Proyecto Completo" type="CompoundRunConfigurationType">
-    <toRun name="Frontend - React" type="ShConfigurationType" />
-    <toRun name="Backend" type="SpringBootApplicationConfigurationType" />
-    <method v="2" />
-  </configuration>
-</component>
