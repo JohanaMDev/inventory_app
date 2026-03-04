@@ -8,6 +8,7 @@ import com.portfolio.inventory_app.model.enums.Disponibilidad;
 import com.portfolio.inventory_app.repository.EmpleadoRepository;
 import com.portfolio.inventory_app.util.DataValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,16 +35,13 @@ public class EmpleadoService {
         
         empleado.setPassword(new BCryptPasswordEncoder().encode(empleado.getPassword()));
         if (empleado.getLegajo() == null || empleado.getLegajo().isEmpty()) {
-        empleado.setLegajo("EMP-" + empleado.getDni().substring(Math.max(0, empleado.getDni().length() - 4)));
+            String suffix = empleado.getDni().length() > 4
+                    ? empleado.getDni().substring(empleado.getDni().length() - 4)
+                    : empleado.getDni();
+            empleado.setLegajo("EMP-" + suffix);
     }
         Empleado saved = empleadoRepository.save(empleado);
         return entityToDto(saved);
-    }
-
-    public Empleado updateStatus(Long id, boolean nuevoEstado) {
-        Empleado existing = encontrarPorId(id);
-        existing.setEstado(nuevoEstado);
-        return empleadoRepository.save(existing);
     }
 
     private EmpleadoDto entityToDto(Empleado empleado) {
@@ -58,19 +56,37 @@ public class EmpleadoService {
     dto.setEstado(empleado.isEstado());
 
     dto.setLegajo(empleado.getLegajo());
-    dto.setPuesto(empleado.getPuesto() != null ? empleado.getPuesto().getNombre() : "Puesto no asignado");
     dto.setDisponibilidad(empleado.getDisponibilidad().name());
     dto.setSucursal(empleado.getSucursal());
     dto.setObjetivoMensual(empleado.getObjetivoMensual());
     dto.setObraSocial(empleado.getObraSocial());
+
+        if (empleado.getPuesto() != null) {
+            dto.setPuesto(empleado.getPuesto().getNombre());
+        } else {
+            dto.setPuesto("SIN ASIGNAR");
+        }
     
     return dto;
     }
 
     public Empleado encontrarPorId(Long id) {
         return empleadoRepository.findById(id)
-                .orElseThrow(() -> new BusinessLogicException
-                        ("Error: Empleado con ID " + id + " no existe en la base de datos."));
+                .orElseThrow(() -> new BusinessLogicException("Empleado no encontrado con ID: " + id));
+    }
+
+    public EmpleadoDto obtenerEmpleadoDto(Long id) {
+        Empleado e = encontrarPorId(id);
+        return entityToDto(e);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public EmpleadoDto updateStatus(Long id, boolean nuevoEstado) {
+        Empleado existing = empleadoRepository.findById(id)
+                .orElseThrow(() -> new BusinessLogicException("Empleado no encontrado con ID: " + id));
+        existing.setEstado(nuevoEstado);
+        Empleado actualizado = empleadoRepository.save(existing);
+        return entityToDto(actualizado);
     }
 
     private void verificarEstadoIntegral(Empleado empleado) {

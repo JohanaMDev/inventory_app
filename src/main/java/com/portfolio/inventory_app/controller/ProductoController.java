@@ -6,6 +6,7 @@ import com.portfolio.inventory_app.service.ProductoService;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -34,11 +35,13 @@ public class ProductoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
     public ResponseEntity<Producto> guardar(@RequestBody Producto producto) {
         return new ResponseEntity<>(productoService.save(producto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/precio")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
     public ResponseEntity<Void> actualizarPrecio(@PathVariable Long id, @RequestParam BigDecimal nuevoPrecio) {
         productoService.actualizarPrecio(id, nuevoPrecio);
         return ResponseEntity.noContent().build();
@@ -50,12 +53,14 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
     public ResponseEntity<?> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
         return new ResponseEntity<>( productoService.update(id, producto), HttpStatus.OK);
     }
