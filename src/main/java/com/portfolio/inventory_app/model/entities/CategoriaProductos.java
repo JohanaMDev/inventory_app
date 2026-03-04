@@ -21,7 +21,7 @@ public class CategoriaProductos {
     @Column(unique = true)
     private String nombre;
 
-    private Boolean activo = true;
+    private boolean activo = true;
 
     public CategoriaProductos(String nombre, Boolean activo) {
         this.nombre = nombre;

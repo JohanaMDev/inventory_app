@@ -45,19 +45,27 @@ public class ProductoService {
 
     @Transactional
     public Producto save(Producto p) {
-        if (p.getPrecioCosto() != null && p.getMargenGanancia() != null) {
-            p.setPrecio(calcularPrecioVenta(p));
+        if (p.getPrecio() == null || p.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
+            if (p.getPrecioCosto() != null && p.getMargenGanancia() != null) {
+                p.setPrecio(calcularPrecioVenta(p));
+            }
+        } else {
+            if (p.getPrecioCosto() != null && p.getPrecio().compareTo(p.getPrecioCosto()) < 0) {
+                throw new RuntimeException("El precio de venta no puede ser menor al costo.");
+            }
         }
         return productoRepository.save(p);
     }
 
     private BigDecimal calcularPrecioVenta(Producto p) {
         BigDecimal costo = (p.getPrecioCosto() != null) ? p.getPrecioCosto() : BigDecimal.ZERO;
-        BigDecimal margen = (p.getMargenGanancia() != null) ? p.getMargenGanancia() : BigDecimal.ZERO;
-        BigDecimal impuesto = (p.getIva() != null) ? p.getIva() : BigDecimal.ZERO;
-        BigDecimal factorMargen = BigDecimal.ONE.add(margen.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
-        BigDecimal factorIva = BigDecimal.ONE.add(impuesto.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
-        return costo.multiply(factorMargen).multiply(factorIva)
+        BigDecimal margen = (p.getMargenGanancia() != null) ? p.getMargenGanancia() : BigDecimal.valueOf(0);
+        BigDecimal iva = (p.getIva() != null) ? p.getIva() : BigDecimal.valueOf(21);
+        BigDecimal cien = BigDecimal.valueOf(100);
+        BigDecimal multiplicadorMargen = margen.divide(cien, 10, RoundingMode.HALF_UP).add(BigDecimal.ONE);
+        BigDecimal multiplicadorIva = iva.divide(cien, 10, RoundingMode.HALF_UP).add(BigDecimal.ONE);
+        return costo.multiply(multiplicadorMargen)
+                .multiply(multiplicadorIva)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 

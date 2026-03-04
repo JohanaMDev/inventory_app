@@ -1,79 +1,85 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
+import InputField from "../components/InputField";
 
-function Login() { // <-- Cambiado de App a Login
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        email: email,
-        password: password
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          email,
+          password,
+        },
+      );
 
-      const token = response.data.access_token;
-      localStorage.setItem('token', token);
+      console.log("Respuesta del servidor:", response.data);
 
-      // Primero navegamos, después avisamos
-      navigate('/dashboard');
-      alert('¡Login Exitoso!');
+      // Ajustamos para capturar el token sin importar cómo lo llame el backend
+      const token = response.data.acces_token;
 
+      if (token) {
+        localStorage.setItem("token", token);
+        console.log("¡Token guardado correctamente en Application!");
+        navigate("/dashboard");
+      } else {
+        console.error(
+          "No se encontró la propiedad 'acces_token' en la respuesta.",
+        );
+      }
     } catch (err) {
-      setError('Credenciales incorrectas o error de conexión.');
-      console.error(err);
+      console.error("Error en el login:", err);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold text-white mb-2 text-center">Bienvenida</h2>
-        <p className="text-slate-400 text-center mb-8">Ingresá al Sistema de Inventario</p>
+      <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
+        <h2 className="text-3xl font-bold text-white mb-2">Bienvenidos</h2>
+        <p className="text-slate-400 mb-8">Ingresá al Sistema de Inventario</p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-slate-300 mb-2 text-sm font-medium">Email</label>
-            <input
-              type="email"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              placeholder="admin@mendoza.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+        <form onSubmit={handleLogin} className="space-y-6 text-left">
+          <InputField
+            label="Email"
+            type="email"
+            placeholder="admin@mendoza.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block text-slate-300 mb-2 text-sm font-medium">Password</label>
-            <input
-              type="password"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <InputField
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          {error && <p className="text-red-400 text-sm text-center font-medium">{error}</p>}
+          {error && (
+            <p className="text-red-400 text-sm text-center font-medium">
+              {error}
+            </p>
+          )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-500/20 transition-all transform active:scale-95"
-          >
+          <Button type="submit" variant="primary">
             Iniciar Sesión
-          </button>
+          </Button>
         </form>
       </div>
     </div>
   );
-} // Llave de cierre de la función Login
+}
 
-export default Login; // Exportación correcta
+export default Login;
