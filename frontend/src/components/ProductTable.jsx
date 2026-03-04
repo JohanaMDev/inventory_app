@@ -5,6 +5,7 @@ const ProductTable = ({ products = [], highlightedId, onEdit }) => {
         <thead>
           <tr className="bg-white/[0.02] text-slate-400 text-xs uppercase tracking-wider">
             <th className="p-4 font-medium">Nombre</th>
+            <th className="p-4 font-medium">Marca</th>
             <th className="p-4 font-medium">Descripción</th>
             <th className="p-4 font-medium">Precio</th>
             <th className="p-4 font-medium text-center">Stock</th>
@@ -29,58 +30,62 @@ const ProductTable = ({ products = [], highlightedId, onEdit }) => {
                   {p.nombre || p.name}
                 </td>
 
-                {/* 2. DESCRIPCIÓN */}
-                <td className="p-4 text-slate-400 text-xs truncate max-w-[200px]">
-                  {p.descripcion || "Sin descripción"}
+                {/* 2. MARCA */}
+                <td className="p-4">{p.marca || "Genérico"}</td>
+
+                {/* 3. DESCRIPCIÓN */}
+                <td className="p-4 max-w-[180px]">
+                  <p
+                    className="text-xs text-slate-400 truncate"
+                    title={p.descripcion}
+                  >
+                    {p.descripcion || "Sin descripción"}
+                  </p>
                 </td>
 
-                {/* 3. PRECIO */}
+                {/* 4. PRECIO */}
                 <td className="p-4 text-white font-semibold">
                   ${p.precio || p.price || 0}
                 </td>
 
-                {/* 4. STOCK */}
+                {/* 5. STOCK */}
+                <td className="p-4 text-center">
+                  <div className="inline-flex flex-col items-center">
+                    <span className="text-white font-bold">
+                      {p.stockActual}
+                    </span>
+                    <span className="text-[9px] text-slate-500 uppercase">
+                      unid.
+                    </span>
+                  </div>
+                </td>
+
+                {/* 6. ESTADO */}
                 <td className="p-4 text-center">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      (p.stockActual || 0) <= 5
-                        ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    }`}
+                    className={`text-[9px] px-2 py-0.5 rounded-md font-bold ${p.activo ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"}`}
                   >
-                    {p.stockActual !== undefined ? p.stockActual : 0} unid.
+                    {p.activo ? "ACTIVO" : "INACTIVO"}
                   </span>
                 </td>
 
-                {/* 5. ESTADO */}
-                <td className="p-4 text-center">
-                  <span
-                    className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                      p.activo
-                        ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                        : "bg-slate-800 text-slate-500 border border-slate-700"
-                    }`}
-                  >
-                    {p.activo ? "Activo" : "Inactivo"}
-                  </span>
-                </td>
-                {/* 6. CATEGORIA */}
+                {/* 7. CATEGORIA */}
                 <td className="p-4 text-center">
                   <span className="p-4 text-slate-400 text-xs truncate max-w-[200px]">
                     {p.categoriaProductos?.nombre || "Sin categoría"}
                   </span>
                 </td>
-                {/* 7. ACCIONES */}
+
+                {/* 8. ACCIONES */}
                 <td className="p-4 text-center">
                   <button
                     onClick={() => onEdit(p)}
-                    className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
+                    className="p-2 bg-blue-500/5 hover:bg-blue-500/20 border border-blue-500/10 hover:border-blue-500/40 rounded-lg text-blue-400 transition-all group"
                     title="Editar producto"
                   >
-                    {/* Icono de Lápiz */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
+                      className="h-4 w-4 transform group-hover:scale-110 transition-transform"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -89,7 +94,7 @@ const ProductTable = ({ products = [], highlightedId, onEdit }) => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                       />
                     </svg>
                   </button>
@@ -99,7 +104,7 @@ const ProductTable = ({ products = [], highlightedId, onEdit }) => {
           ) : (
             <tr>
               <td
-                colSpan="6"
+                colSpan="7"
                 className="p-10 text-center text-slate-500 italic"
               >
                 No hay productos en el inventario.

@@ -1,5 +1,6 @@
 package com.portfolio.inventory_app.service;
 
+import com.portfolio.inventory_app.dto.EmpleadoDto;
 import com.portfolio.inventory_app.exception.BusinessLogicException;
 import com.portfolio.inventory_app.exception.EmployeeStatusException;
 import com.portfolio.inventory_app.model.entities.Empleado;
@@ -7,6 +8,7 @@ import com.portfolio.inventory_app.model.enums.Disponibilidad;
 import com.portfolio.inventory_app.repository.EmpleadoRepository;
 import com.portfolio.inventory_app.util.DataValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,68 +17,54 @@ import java.util.List;
 public class EmpleadoService {
 
     @Autowired private EmpleadoRepository empleadoRepository;
-    @Autowired private PuestoService puestoService;
     @Autowired private DataValidator validator;
 
-    public List<Empleado> listAll() {
-        return empleadoRepository.findAll();
+    public List<EmpleadoDto> listAll() {
+        return empleadoRepository.findAll()
+        .stream()
+        .map(this::entityToDto)
+        .collect(java.util.stream.Collectors.toList());
     }
 
-    public Empleado save(Empleado empleado) {
+    public EmpleadoDto save(Empleado empleado) {
         empleadoRepository.findByDni(empleado.getDni()).ifPresent(e -> {
             throw new BusinessLogicException("El empleado ya existe");
         });
         validator.validarEmail(empleado.getEmail());
-        return empleadoRepository.save(empleado);
+        
+        empleado.setPassword(new BCryptPasswordEncoder().encode(empleado.getPassword()));
+        if (empleado.getLegajo() == null || empleado.getLegajo().isEmpty()) {
+        empleado.setLegajo("EMP-" + empleado.getDni().substring(Math.max(0, empleado.getDni().length() - 4)));
+    }
+        Empleado saved = empleadoRepository.save(empleado);
+        return entityToDto(saved);
     }
 
-    public Empleado validarVendedor(Long id) {
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadDeVenta(e.getPuesto());
-        return e;
+    public Empleado updateStatus(Long id, boolean nuevoEstado) {
+        Empleado existing = encontrarPorId(id);
+        existing.setEstado(nuevoEstado);
+        return empleadoRepository.save(existing);
     }
 
-    public Empleado validarGestorInventario(Long id) {
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadGestionInventario(e.getPuesto());
-        return e;
-    }
+    private EmpleadoDto entityToDto(Empleado empleado) {
+    EmpleadoDto dto = new EmpleadoDto();
+    dto.setId(empleado.getId());
+    dto.setNombre(empleado.getNombre());
+    dto.setEmail(empleado.getEmail());
+    dto.setDni(empleado.getDni());
+    dto.setRol(empleado.getRol().name());
+    dto.setTelefono(empleado.getTelefono());
+    dto.setDomicilio(empleado.getDomicilio());
+    dto.setEstado(empleado.isEstado());
 
-    public Empleado validarGestorEmpleados(Long id){
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadGestionEmpleados(e.getPuesto());
-        return e;
-    }
-
-    public Empleado validarReportesSensibles(Long id){
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadReportesSensibles(e.getPuesto());
-        return e;
-    }
-
-    public Empleado validarGestorClientes(Long id){
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadGestionClientes(e.getPuesto());
-        return e;
-    }
-
-    public Empleado validarRealizarMantenimiento(Long id){
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadRealizarMantenimiento(e.getPuesto());
-        return e;
-    }
-
-    public Empleado validarConfigSistema(Long id){
-        Empleado e = encontrarPorId(id);
-        verificarEstadoIntegral(e);
-        puestoService.validarCapacidadConfigSistema(e.getPuesto());
-        return e;
+    dto.setLegajo(empleado.getLegajo());
+    dto.setPuesto(empleado.getPuesto() != null ? empleado.getPuesto().getNombre() : "Puesto no asignado");
+    dto.setDisponibilidad(empleado.getDisponibilidad().name());
+    dto.setSucursal(empleado.getSucursal());
+    dto.setObjetivoMensual(empleado.getObjetivoMensual());
+    dto.setObraSocial(empleado.getObraSocial());
+    
+    return dto;
     }
 
     public Empleado encontrarPorId(Long id) {

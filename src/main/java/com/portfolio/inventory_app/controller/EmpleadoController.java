@@ -1,5 +1,6 @@
 package com.portfolio.inventory_app.controller;
 
+import com.portfolio.inventory_app.dto.EmpleadoDto;
 import com.portfolio.inventory_app.model.entities.Empleado;
 import com.portfolio.inventory_app.service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,15 @@ public class EmpleadoController {
     private EmpleadoService empleadoService;
 
     @GetMapping
-    public List<Empleado> listarTodos() {
+    public List<EmpleadoDto> listarTodos() {
         return empleadoService.listAll();
     }
 
     @PostMapping
-    public Empleado guardar(@RequestBody Empleado empleado) {
+    public EmpleadoDto guardar(@RequestBody Empleado empleado) {
         return empleadoService.save(empleado);
     }
+
+    
+
 }

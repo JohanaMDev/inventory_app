@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react"; // 💡 Agregamos useCallback
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../layout/Sidebar";
 import ProductTable from "../components/ProductTable";
 import Button from "../components/Button";
-import AddProductModal from "../components/AddProductModal"; // 💡 Asegurate de que este archivo exista
+import AddProductModal from "../components/AddProductModal";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -60,9 +60,18 @@ const Products = () => {
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
-  const filteredProducts = products.filter((p) =>
-    (p.nombre || "").toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredProducts = products.filter((p) => {
+    const search = searchTerm.toLowerCase();
+
+    const matchNombre = (p.nombre || "").toLowerCase().includes(search);
+    const matchDescripcion = (p.descripcion || "")
+      .toLowerCase()
+      .includes(search);
+    const matchMarca = (p.marca || "").toLowerCase().includes(search);
+    const matchCodigo = (p.codigoBarras || "").toLowerCase().includes(search);
+
+    return matchNombre || matchDescripcion || matchMarca || matchCodigo;
+  });
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
