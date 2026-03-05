@@ -26,7 +26,4 @@ public class Sector {
     @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Puesto> puestos = new ArrayList<>();
 
-    public Sector(String nombre) {
-        this.nombre = nombre;
-    }
 }

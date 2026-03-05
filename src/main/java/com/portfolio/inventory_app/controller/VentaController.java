@@ -32,7 +32,7 @@ public class VentaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthoriry('CAN_MANAGE_SALES)")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_SALES')")
     public ResponseEntity<?> create(@RequestBody Venta venta) {
         try {
             Venta nuevaVenta = ventaService.registrarVenta(venta);

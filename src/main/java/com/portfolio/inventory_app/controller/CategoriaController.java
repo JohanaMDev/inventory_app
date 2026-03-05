@@ -32,13 +32,13 @@ public class CategoriaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY')")
     public ResponseEntity<CategoriaProductos> create(@RequestBody CategoriaProductos categoria){
         return new ResponseEntity<>(categoriaService.save(categoria), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY')")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         try {
             categoriaService.delete(id);

@@ -35,13 +35,13 @@ public class ProductoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
     public ResponseEntity<Producto> guardar(@RequestBody Producto producto) {
         return new ResponseEntity<>(productoService.save(producto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/precio")
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
     public ResponseEntity<Void> actualizarPrecio(@PathVariable Long id, @RequestParam BigDecimal nuevoPrecio) {
         productoService.actualizarPrecio(id, nuevoPrecio);
         return ResponseEntity.noContent().build();
@@ -53,14 +53,14 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY)")
+    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
     public ResponseEntity<?> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
         return new ResponseEntity<>( productoService.update(id, producto), HttpStatus.OK);
     }

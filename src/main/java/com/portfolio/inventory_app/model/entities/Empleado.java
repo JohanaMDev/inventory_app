@@ -19,10 +19,6 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 public class Empleado extends Usuario {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "puesto_id")
     @JsonIgnoreProperties("empleados")

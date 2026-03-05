@@ -7,6 +7,7 @@ import com.portfolio.inventory_app.model.entities.Empleado;
 import com.portfolio.inventory_app.model.enums.Disponibilidad;
 import com.portfolio.inventory_app.repository.EmpleadoRepository;
 import com.portfolio.inventory_app.util.DataValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +28,8 @@ public class EmpleadoService {
         .collect(java.util.stream.Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority('CAN_MANAGE_EMPLOYEES') or hasAnyRole('SUPER_ADMIN','ADMIN')")
+    @Transactional
     public EmpleadoDto save(Empleado empleado) {
         empleadoRepository.findByDni(empleado.getDni()).ifPresent(e -> {
             throw new BusinessLogicException("El empleado ya existe");
@@ -80,7 +83,8 @@ public class EmpleadoService {
         return entityToDto(e);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CAN_MANAGE_EMPLOYEES') or hasAnyRole('SUPER_ADMIN','ADMIN')")
+    @Transactional
     public EmpleadoDto updateStatus(Long id, boolean nuevoEstado) {
         Empleado existing = empleadoRepository.findById(id)
                 .orElseThrow(() -> new BusinessLogicException("Empleado no encontrado con ID: " + id));

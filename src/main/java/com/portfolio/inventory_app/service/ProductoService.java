@@ -5,6 +5,7 @@ import com.portfolio.inventory_app.model.entities.Producto;
 import com.portfolio.inventory_app.repository.ProductoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -43,6 +44,7 @@ public class ProductoService {
                 .orElseThrow(() -> new RuntimeException("Código de barras no reconocido: " + codigo));
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @Transactional
     public Producto save(Producto p) {
         if (p.getPrecio() == null || p.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
@@ -69,6 +71,7 @@ public class ProductoService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @Transactional
     public Producto update(Long id, Producto detalles) {
         Producto p = getById(id);
@@ -84,6 +87,7 @@ public class ProductoService {
         return productoRepository.save(p);
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @Transactional
     public void delete(Long id) {
         Producto p = getById(id);
@@ -91,6 +95,7 @@ public class ProductoService {
         productoRepository.save(p);
     }
 
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @Transactional
     public void actualizarStock(Long id, Integer cantidad, boolean esIncremento) {
         Producto p = getById(id);
@@ -108,6 +113,7 @@ public class ProductoService {
         p.setStockActual(nuevoStock);
         productoRepository.save(p);
     }
+
 
     public void actualizarPrecio(Long id, BigDecimal nuevoPrecio) {
         if (nuevoPrecio.compareTo(BigDecimal.ZERO) <= 0) {

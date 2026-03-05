@@ -1,12 +1,10 @@
 package com.portfolio.inventory_app.service;
 
 import com.portfolio.inventory_app.exception.BusinessLogicException;
-import com.portfolio.inventory_app.model.entities.Cliente;
-import com.portfolio.inventory_app.model.entities.DetalleVenta;
-import com.portfolio.inventory_app.model.entities.Empleado;
-import com.portfolio.inventory_app.model.entities.Venta;
+import com.portfolio.inventory_app.model.entities.*;
 import com.portfolio.inventory_app.repository.VentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +28,10 @@ public class VentaService {
         return ventaRepository.findById(id).get();
     }
 
-
+    @PreAuthorize("hasAuthority('CAN_MANAGE_SALES') or hasAnyRole('SUPER_ADMIN','ADMIN','SELLER')")
     @Transactional
     public Venta registrarVenta(Venta venta) {
-        Empleado vendedor = empleadoService.validarVendedor(venta.getEmpleado().getId());
+        Empleado vendedor = empleadoService.encontrarPorId(venta.getEmpleado().getId());
         Cliente cliente = clienteService.validarClienteParaVenta(venta.getCliente().getId());
         venta.setEmpleado(vendedor);
         venta.setCliente(cliente);

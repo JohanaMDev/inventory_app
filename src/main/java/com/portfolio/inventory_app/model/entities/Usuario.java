@@ -55,21 +55,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.rol.name()));
-
-        if (this instanceof Empleado emp && emp.getPuesto() != null) {
-            Puesto p = emp.getPuesto();
-            if(p.isPuedeConfigurarSistema()) authorities.add(new SimpleGrantedAuthority("CAN_CONFIGURE_SYSTEM"));
-            if(p.isPuedeGestionarInventario()) authorities.add(new SimpleGrantedAuthority("CAN_MANAGE_INVENTORY"));
-            if(p.isPuedeVender()) authorities.add(new SimpleGrantedAuthority("CAN_MANAGE_SALES"));
-            if(p.isPuedeGestionarEmpleados()) authorities.add(new SimpleGrantedAuthority("CAN_MANAGE_EMPLOYEES"));  
-            if(p.isPuedeGestionarClientes()) authorities.add(new SimpleGrantedAuthority("CAN_MANAGE_CUSTOMERS"));   
-            if(p.isPuedeVerReportesSensibles()) authorities.add(new SimpleGrantedAuthority("CAN_VIEW_SENSITIVE_REPORTS"));  
-            if(p.isPuedeRealizarMantenimiento()) authorities.add(new SimpleGrantedAuthority("CAN_PERFORM_MAINTENANCE"));    
-        }
-
-        return authorities;
+        return rol.getAuthorities();
     }
 
     @Override
