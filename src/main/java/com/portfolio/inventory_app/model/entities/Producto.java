@@ -1,73 +1,60 @@
 package com.portfolio.inventory_app.model.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+
 import java.math.BigDecimal;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "productos")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "productos")
 public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "El nombre es obligatorio")
     @Column(nullable = false)
     private String nombre;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @Builder.Default
     private boolean activo= true;
 
-    @DecimalMin(value = "0.1", message = "El precio debe ser mayor a 0")
     @Column(nullable = false)
-    private BigDecimal precio;
+    private BigDecimal precioVenta;
 
     @Column (name = "precio_costo")
     private BigDecimal precioCosto;
 
     @Column(name = "margen_ganancia")
     private BigDecimal margenGanancia;
-    private BigDecimal iva;
 
-    @Min(value = 0, message = "El stock no puede ser negativo")
+    @Builder.Default
+    private BigDecimal iva = new BigDecimal("21.0");
+
+    @Builder.Default
     @Column(nullable = false)
-    private Integer stockActual;
+    private Integer stockActual = 0;
 
     private Integer stockMinimo;
 
     @Column(name = "codigo_barras", unique = true, nullable = false)
     private String codigoBarras;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "categoria_id", nullable = true)
-    @JsonIgnoreProperties("productos")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
     private CategoriaProductos categoriaProductos;
 
-    @Column(name = "marca")
     private String marca;
 
-    public Producto(String nombre, String descripcion, Boolean activo, BigDecimal precio,
-                    Integer stockActual, String codigoBarras, CategoriaProductos categoriaProductos, String marca) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.activo = activo;
-        this.precio = precio;
-        this.stockActual = stockActual;
-        this.codigoBarras = codigoBarras;
-        this.categoriaProductos = categoriaProductos;
-        this.marca = marca;
-    }
 }

@@ -14,8 +14,9 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
 
     List<Empleado> findByRol(Rol rol);
     Optional<Empleado> findByDni(String Dni);
-    List<Empleado> findByNombre(String nombre);
+    List<Empleado> findByNombreIgnoreCase(String nombre);
     List<Empleado> findByPuestoSector(String sector);
-    List<Empleado> findByPuesto(String puesto);
+    List<Empleado> findByPuestoNombre(String puesto);
+    Optional<Empleado> findByLegajo(String legajo);
 
 }

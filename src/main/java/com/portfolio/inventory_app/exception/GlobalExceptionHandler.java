@@ -2,10 +2,12 @@ package com.portfolio.inventory_app.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -17,6 +19,11 @@ public class GlobalExceptionHandler {
         body.put("message", message);
         body.put("status", status.value());
         return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex) {
+        return buildResponse("Internal Server Error", "Ocurrió un error inesperado. Contacte al administrador.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(StockInsuficienteException.class)
@@ -59,4 +66,11 @@ public class GlobalExceptionHandler {
         return buildResponse("Email Invalido", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return buildResponse("Error de Validación", message, HttpStatus.BAD_REQUEST);
+    }
 }

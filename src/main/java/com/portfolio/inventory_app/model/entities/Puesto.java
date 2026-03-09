@@ -1,17 +1,20 @@
 package com.portfolio.inventory_app.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
-@Table(name = "puestos")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "puestos")
 public class Puesto {
 
     @Id
@@ -23,10 +26,10 @@ public class Puesto {
 
     @ManyToOne
     @JoinColumn(name = "sector_id")
+    @JsonBackReference
     private Sector sector;
 
     @OneToMany(mappedBy = "puesto")
     private List<Empleado> empleados;
-
 
 }

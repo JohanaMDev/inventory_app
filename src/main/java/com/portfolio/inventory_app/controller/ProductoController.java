@@ -1,9 +1,9 @@
 package com.portfolio.inventory_app.controller;
 
 
-import com.portfolio.inventory_app.model.entities.Producto;
+import com.portfolio.inventory_app.dto.resources.ProductoDTO;
 import com.portfolio.inventory_app.service.ProductoService;
-import org.springframework.beans.factory.annotation.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,41 +14,45 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/productos")
+@RequiredArgsConstructor
 public class ProductoController {
 
-    @Autowired
-    private ProductoService productoService;
+    private final ProductoService productoService;
 
     @GetMapping
-    public ResponseEntity<List<Producto>> listarActivos() {
-
+    public ResponseEntity<List<ProductoDTO.Response>> listarActivos() {
         return ResponseEntity.ok(productoService.listActivos());
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<Producto> buscarProducto(@RequestParam String codigo) {
+    public ResponseEntity<ProductoDTO.Response> buscarProducto(@RequestParam String codigo) {
         try {
-            return ResponseEntity.ok(productoService.buscarPorCodigoBarras(codigo));
+            return ResponseEntity.ok(productoService.getResponseByCodigo(codigo));
         } catch (Exception e) {
-            return ResponseEntity.ok(productoService.getById(Long.parseLong(codigo)));
+            return ResponseEntity.ok(productoService.getResponseById(Long.parseLong(codigo)));
         }
     }
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
-    public ResponseEntity<Producto> guardar(@RequestBody Producto producto) {
-        return new ResponseEntity<>(productoService.save(producto), HttpStatus.CREATED);
+    public ResponseEntity<ProductoDTO.Response> guardar(@RequestBody ProductoDTO.Request request) {
+        return new ResponseEntity<>(productoService.save(request), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}/precio")
+    @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
-    public ResponseEntity<Void> actualizarPrecio(@PathVariable Long id, @RequestParam BigDecimal nuevoPrecio) {
-        productoService.actualizarPrecio(id, nuevoPrecio);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ProductoDTO.Response> actualizarProducto(@PathVariable Long id, @RequestBody ProductoDTO.Request request) {
+        return ResponseEntity.ok(productoService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/precioVenta")
+    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
+    public ResponseEntity<ProductoDTO.Response> actualizarPrecio(@PathVariable Long id, @RequestParam BigDecimal nuevoPrecio) {
+        return ResponseEntity.ok(productoService.actualizarPrecio(id, nuevoPrecio));
     }
 
     @GetMapping("/alertas-stock")
-    public ResponseEntity<List<Producto>> obtenerAlertas() {
+    public ResponseEntity<List<ProductoDTO.Response>> obtenerAlertas() {
         return ResponseEntity.ok(productoService.obtenerAlertasStock());
     }
 
@@ -59,10 +63,5 @@ public class ProductoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('CAN_MANAGE_INVENTORY','CAN_CONFIGURE_SYSTEM')")
-    public ResponseEntity<?> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        return new ResponseEntity<>( productoService.update(id, producto), HttpStatus.OK);
-    }
-
 }
+

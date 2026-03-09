@@ -26,10 +26,7 @@ public class AppConfig {
         return username ->  {
             final Usuario user= usuarioRepository.findByEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getEmail())
-                    .password(user.getPassword())
-                    .build();
+            return user;
         };
     }
 
@@ -46,7 +43,6 @@ public class AppConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
-//        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

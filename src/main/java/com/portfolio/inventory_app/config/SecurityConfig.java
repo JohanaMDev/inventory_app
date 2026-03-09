@@ -1,8 +1,7 @@
 package com.portfolio.inventory_app.config;
 
-import com.portfolio.inventory_app.security.JwtAuthFilter;
-import com.portfolio.inventory_app.security.Token;
-import com.portfolio.inventory_app.security.TokenRepository;
+import com.portfolio.inventory_app.repository.TokenRepository;
+import com.portfolio.inventory_app.security.filter.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,53 +38,45 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/auth/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
+                        req.requestMatchers("/api/auth/**").permitAll()
+                                .anyRequest().authenticated()
                 )
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
-                        logout.logoutUrl("/auth/logout")
-                                .addLogoutHandler((request,
-                                                   response,
-                                                   authentication) -> {
-                                    final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-                                    revokeToken(authHeader);
+                        logout.logoutUrl("/api/auth/logout")
+                                .addLogoutHandler((request, response, authentication) -> {
+                                    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                                        revokeToken(authHeader);
+                                    }
                                 })
-                                .logoutSuccessHandler((
-                                        (request, response, authentication)
-                                                -> SecurityContextHolder.clearContext()))
+                                .logoutSuccessHandler((request, response, authentication) ->
+                                        SecurityContextHolder.clearContext())
                 );
-
 
         return http.build();
     }
 
-    private void revokeToken(final String token) {
-        if (token == null || !token.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Invalid token");
-        }
-        final String jwtToken = token.substring(7);
-        final Token foundToken = tokenRepository.findByToken(jwtToken)
-                .orElseThrow(()-> new IllegalArgumentException("Invalid token"));
-        foundToken.setExpired(true);
-        foundToken.setRevoked(true);
-        tokenRepository.save(foundToken);
+    private void revokeToken(final String authHeader) {
+        final String jwtToken = authHeader.substring(7);
+        tokenRepository.findByToken(jwtToken).ifPresent(foundToken -> {
+            foundToken.setExpired(true);
+            foundToken.setRevoked(true);
+            tokenRepository.save(foundToken);
+        });
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Tu puerto de React
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Vite/React
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowCredentials(true); // Importante si vas a usar cookies o auth específica
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

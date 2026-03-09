@@ -1,62 +1,81 @@
 package com.portfolio.inventory_app.service;
 
-import com.portfolio.inventory_app.exception.BusinessLogicException;
+import com.portfolio.inventory_app.dto.resources.DetalleVentaDTO;
+import com.portfolio.inventory_app.dto.resources.VentaDTO;
+import com.portfolio.inventory_app.mapper.VentaMapper;
 import com.portfolio.inventory_app.model.entities.*;
 import com.portfolio.inventory_app.repository.VentaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class VentaService {
 
-    @Autowired private VentaRepository ventaRepository;
-    @Autowired private EmpleadoService empleadoService;
-    @Autowired private ClienteService clienteService;
-    @Autowired private DetalleVentaService detalleVentaService;
+    private final VentaRepository ventaRepository;
+    private final VentaMapper ventaMapper;
+    private final ClienteService clienteService;
+    private final EmpleadoService empleadoService;
+    private final DetalleVentaService detalleVentaService;
 
-    public List<Venta> listAll() {
-        return ventaRepository.findAll();
+    public List<VentaDTO.Response> listAll() {
+        return ventaRepository.findAll().stream()
+                .map(ventaMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Venta findById(Long id) {
-        return ventaRepository.findById(id).get();
+    public VentaDTO.Response findById(Long id) {
+        Venta venta = ventaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada con ID: " + id));
+        return ventaMapper.toResponseDTO(venta);
     }
 
     @PreAuthorize("hasAuthority('CAN_MANAGE_SALES') or hasAnyRole('SUPER_ADMIN','ADMIN','SELLER')")
     @Transactional
-    public Venta registrarVenta(Venta venta) {
-        Empleado vendedor = empleadoService.encontrarPorId(venta.getEmpleado().getId());
-        Cliente cliente = clienteService.validarClienteParaVenta(venta.getCliente().getId());
-        venta.setEmpleado(vendedor);
-        venta.setCliente(cliente);
-        venta.setFecha(LocalDateTime.now());
-        if (venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
-            throw new BusinessLogicException("Error: Una venta debe tener al menos un producto.");
+    public VentaDTO.Response registrarVenta(VentaDTO.Request request) {
+        Cliente cliente = clienteService.validarClienteParaVenta(request.clienteId());
+        Empleado empleado = empleadoService.encontrarPorId(request.empleadoId());
+
+        Venta venta = Venta.builder()
+                .cliente(cliente)
+                .empleado(empleado)
+                .fecha(LocalDateTime.now())
+                .build();
+        List<DetalleVenta> detalles = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetalleVentaDTO.Request itemDto : request.detalles()) {
+            DetalleVenta detalle = detalleVentaService.procesarLinea(itemDto, venta);
+            detalles.add(detalle);
+            BigDecimal subtotal = detalle.getPrecioUnitario().multiply(new BigDecimal(detalle.getCantidad()));
+            total = total.add(subtotal);
         }
-        BigDecimal totalAcumulado = BigDecimal.ZERO;
-        for (DetalleVenta detalle : venta.getDetalles()) {
-            BigDecimal subtotal = detalleVentaService.procesarLinea(detalle, venta);
-            totalAcumulado = totalAcumulado.add(subtotal);
-        }
-        venta.setTotal(totalAcumulado);
-        return ventaRepository.save(venta);
+        venta.setDetalles(detalles);
+        venta.setTotal(total);
+        return ventaMapper.toResponseDTO(ventaRepository.save(venta));
     }
 
-    public List<Venta> findByEmpleadoId(Long empleadoId) {
-        return ventaRepository.findByEmpleado_Id(empleadoId);
+    public List<VentaDTO.Response> findByEmpleadoId(Long empleadoId) {
+        return ventaRepository.findByEmpleado_Id(empleadoId).stream()
+                        .map(ventaMapper::toResponseDTO).collect(Collectors.toList());
     }
 
-    public List<Venta> findByClienteId(Long clienteId) {
-        return ventaRepository.findByCliente_Id(clienteId);
+    public List<VentaDTO.Response> findByClienteId(Long clienteId) {
+        return ventaRepository.findByCliente_Id(clienteId).stream()
+                .map(ventaMapper::toResponseDTO).collect(Collectors.toList());
     }
 
-    public List<Venta> findByRangoFechas(LocalDateTime inicio, LocalDateTime fin) {
-        return ventaRepository.findByFechaBetween(inicio, fin);
+    public List<VentaDTO.Response> findByRangoFechas(LocalDateTime inicio, LocalDateTime fin) {
+        return ventaRepository.findByFechaBetween(inicio, fin).stream()
+                .map(ventaMapper::toResponseDTO).collect(Collectors.toList());
     }
+
 }

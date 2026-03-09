@@ -1,11 +1,10 @@
 package com.portfolio.inventory_app.model.entities;
 
 import com.portfolio.inventory_app.model.enums.Rol;
-import com.portfolio.inventory_app.security.Token;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -13,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "usuarios")
-@Inheritance(strategy = InheritanceType.JOINED)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "usuarios")
 public class Usuario implements UserDetails {
 
     @Id

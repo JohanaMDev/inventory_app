@@ -10,12 +10,13 @@ import java.util.stream.Collectors;
 public enum Rol {
 //    SUPER_ADMIN, // Acceso total, gestión de empleados y sectores
 //    ADMIN,       // Gestión operativa (inventario, ventas)
+//    EMPLOYEE     // Personal interno General
 //    SELLER,      // El "Vendedor" de tu lista (puede ver prospectos y ayudar clientes)
 //    CLIENT,      // El cliente que se loguea para comprar
 //    GUEST;       // Usuario no registrado (solo ve catálogo público)
 
 
-// Acceso total, gestión de empleados y sectores
+    // Acceso total, gestión de empleados y sectores
     SUPER_ADMIN(Set.of(Permission.values())),
 
     // Gestión operativa (inventario, ventas, clientes)
@@ -25,6 +26,13 @@ public enum Rol {
             Permission.CAN_MANAGE_CLIENTS,
             Permission.CAN_VIEW_SENSITIVE_REPORTS,
             Permission.CAN_MANAGE_EMPLOYEES
+    )),
+
+    //Ver Inventario, Gestionar Clientes y realizar soporte en Ventas
+    EMPLOYEE(Set.of(
+            Permission.CAN_MANAGE_CLIENTS,
+            Permission.CAN_MANAGE_SALES,
+            Permission.CAN_MANAGE_INVENTORY
     )),
 
     // Vendedor (puede ver prospectos/clientes y vender)

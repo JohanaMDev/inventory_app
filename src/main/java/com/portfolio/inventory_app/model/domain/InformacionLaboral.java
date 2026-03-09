@@ -23,7 +23,7 @@ public class InformacionLaboral {
     private String cbu;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "fecha_ingreso")
+    @Column(name = "fecha_ingreso", nullable = false)
     private Date ingreso;
 
     @Enumerated(EnumType.STRING)

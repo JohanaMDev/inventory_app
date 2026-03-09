@@ -4,6 +4,7 @@ package com.portfolio.inventory_app.model.entities;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,10 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name ="venta")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name ="ventas")
 public class Venta {
 
     @Id
@@ -27,8 +29,9 @@ public class Venta {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
+    @Builder.Default
     @Column(nullable = false)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

@@ -1,50 +1,48 @@
 package com.portfolio.inventory_app.controller;
 
-import com.portfolio.inventory_app.model.entities.CategoriaProductos;
-import com.portfolio.inventory_app.service.CategoriaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.portfolio.inventory_app.dto.resources.CategoriaProductosDTO;
+import com.portfolio.inventory_app.service.CategoriaProductosService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/categorias")
+@RequiredArgsConstructor
 public class CategoriaController {
 
-    @Autowired private CategoriaService categoriaService;
+    private final CategoriaProductosService categoriaService;
 
     @GetMapping
-    public ResponseEntity<List<CategoriaProductos>> listarActivos(){
-        return ResponseEntity.ok(categoriaService.findByActivoTrue());
+    public ResponseEntity<List<CategoriaProductosDTO.Response>> listarActivos() {
+        return ResponseEntity.ok(categoriaService.listarActivas());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoriaProductosDTO.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.buscarCategoriaPorId(id));
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<CategoriaProductos> buscarCategoria(@RequestParam String nombre) {
-        try {
-            return ResponseEntity.ok(categoriaService.buscarCategoriaPorNombre(nombre));
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+    public ResponseEntity<CategoriaProductosDTO.Response> buscarPorNombre(@RequestParam String nombre) {
+        return ResponseEntity.ok(categoriaService.buscarCategoriaPorNombre(nombre));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY')")
-    public ResponseEntity<CategoriaProductos> create(@RequestBody CategoriaProductos categoria){
-        return new ResponseEntity<>(categoriaService.save(categoria), HttpStatus.CREATED);
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN') or hasAuthority('CAN_MANAGE_INVENTORY')")
+    public ResponseEntity<CategoriaProductosDTO.Response> crear(@RequestBody @Valid CategoriaProductosDTO.Request request) {
+        return new ResponseEntity<>(categoriaService.guardar(request), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CAN_MANAGE_INVENTORY')")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
-        try {
-            categoriaService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN') or hasAuthority('CAN_MANAGE_INVENTORY')")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        categoriaService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -5,18 +5,21 @@ import com.portfolio.inventory_app.model.enums.Origen;
 import com.portfolio.inventory_app.model.enums.TipoCliente;
 import com.portfolio.inventory_app.model.enums.CategoriaFiscal;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "clientes")
 @Data
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "clientes")
 @EqualsAndHashCode(callSuper = true)
 public class Cliente extends Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private TipoCliente tipoCliente;
@@ -33,5 +36,7 @@ public class Cliente extends Usuario {
     private Integer puntuacion;
     private String preferencia;
 
-
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", unique = true, nullable = false)
+    private Usuario usuario;
 }

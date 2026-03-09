@@ -1,4 +1,4 @@
-package com.portfolio.inventory_app.security;
+package com.portfolio.inventory_app.security.service;
 
 import com.portfolio.inventory_app.model.entities.Usuario;
 import io.jsonwebtoken.Claims;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
-
 
 @Service
 public class JwtService {
@@ -34,7 +33,7 @@ public class JwtService {
     private String buildToken(final Usuario user, final Long expiration) {
         return Jwts.builder()
                 .id(user.getId().toString())
-                .claims(Map.of("name", user.getNombre()))
+                .claims(Map.of("name", user.getNombre(), "role", user.getRol().name()))
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))

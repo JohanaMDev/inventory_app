@@ -4,20 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.portfolio.inventory_app.model.domain.InformacionLaboral;
 import com.portfolio.inventory_app.model.enums.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "empleados")
 @Data
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Table(name = "empleados")
 public class Empleado extends Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "puesto_id")
@@ -41,5 +44,9 @@ public class Empleado extends Usuario {
 
     @Column(name = "obra_social")
     private String obraSocial;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", unique = true, nullable = false)
+    private Usuario usuario;
 
 }

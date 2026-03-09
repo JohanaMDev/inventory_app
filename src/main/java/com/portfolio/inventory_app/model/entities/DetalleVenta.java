@@ -3,16 +3,18 @@ package com.portfolio.inventory_app.model.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "detalle_venta")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "detalle_venta")
 public class DetalleVenta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,4 +1,4 @@
-package com.portfolio.inventory_app.security;
+package com.portfolio.inventory_app.dto.request;
 
 public record LoginRequest(
         String email,

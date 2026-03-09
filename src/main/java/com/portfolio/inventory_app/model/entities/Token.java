@@ -1,6 +1,6 @@
-package com.portfolio.inventory_app.security;
+package com.portfolio.inventory_app.model.entities;
 
-import com.portfolio.inventory_app.model.entities.Usuario;
+import com.portfolio.inventory_app.model.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,24 +12,22 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "tokens")
+@Entity
+@Table(name = "tokens")
 public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, columnDefinition = "TEXT")
     private String token;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private TokenType tokenType = TokenType.BEARER;
 
-    @Column(nullable = false)
     private boolean revoked;
-
-    @Column(nullable = false)
     private boolean expired;
 
     @ManyToOne(fetch = FetchType.LAZY)

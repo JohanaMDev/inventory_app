@@ -1,25 +1,38 @@
 package com.portfolio.inventory_app.service;
 
+import com.portfolio.inventory_app.dto.resources.DetalleVentaDTO;
+import com.portfolio.inventory_app.mapper.DetalleVentaMapper;
 import com.portfolio.inventory_app.model.entities.DetalleVenta;
 import com.portfolio.inventory_app.model.entities.Producto;
 import com.portfolio.inventory_app.model.entities.Venta;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DetalleVentaService {
 
-    @Autowired private ProductoService productoService;
+    private final ProductoService productoService;
+    private final DetalleVentaMapper detalleVentaMapper;
 
-    public BigDecimal procesarLinea(DetalleVenta detalle, Venta venta) {
-        Producto p = productoService.getById(detalle.getProducto().getId());
-        detalle.setVenta(venta);
-        detalle.setProducto(p);
-        detalle.setPrecioUnitario(p.getPrecio());
-        BigDecimal subtotal = p.getPrecio().multiply(new BigDecimal(detalle.getCantidad()));
-        productoService.actualizarStock(p.getId(), detalle.getCantidad(), false);
-        return subtotal;
+    public DetalleVenta procesarLinea(DetalleVentaDTO.Request request, Venta venta) {
+        Producto p = productoService.getById(request.productoId());
+        DetalleVenta detalle = DetalleVenta.builder()
+                .venta(venta)
+                .producto(p)
+                .cantidad(request.cantidad())
+                .precioUnitario(p.getPrecioVenta())
+                .build();
+        productoService.actualizarStock(p.getId(), request.cantidad(), false);
+        return detalle;
     }
+
+    public List<DetalleVentaDTO.Response> mapListToResponse(List<DetalleVenta> detalles) {
+        return detalles.stream()
+                .map(detalleVentaMapper::toResponseDTO)
+                .toList();
+    }
+
 }
